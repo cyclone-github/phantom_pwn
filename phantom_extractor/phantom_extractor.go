@@ -53,17 +53,17 @@ func helpFunc() {
 ./phantom_extractor.bin ldeveldb/
 
 Note: Phantom Vault Dir location on Linux with Chrome:
-/home/{username}/.config/google-chrome/Default/Local Extension Settings/bfnaelmomeimhlpmgjnjophhpkkoljpa/`
+/home/$USER/.config/google-chrome/Default/Local\ Extension\ Settings/bfnaelmomeimhlpmgjnjophhpkkoljpa/`
 	fmt.Fprintln(os.Stderr, str)
 }
 
 // print welcome screen
 func printWelcomeScreen() {
-	fmt.Println(" ---------------------------------------------------- ")
+	fmt.Println(" ----------------------------------------------------- ")
 	fmt.Println("|        Cyclone's Phantom Vault Hash Extractor       |")
 	fmt.Println("|        Use Phantom Vault Decryptor to decrypt       |")
 	fmt.Println("|    https://github.com/cyclone-github/phantom_pwn    |")
-	fmt.Println(" ---------------------------------------------------- ")
+	fmt.Println(" ----------------------------------------------------- ")
 }
 
 // define structs

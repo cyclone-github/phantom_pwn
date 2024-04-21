@@ -40,7 +40,7 @@ GNU General Public License v2.0
 https://github.com/cyclone-github/phantom_pwn/blob/main/LICENSE
 
 version history
-v0.1.0-2024-04-20-1200; initial release
+v0.1.0-2024-04-20-2000; initial release
 */
 
 // clear screen function
@@ -59,7 +59,7 @@ func clearScreen() {
 
 // version func
 func versionFunc() {
-	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Decryptor v0.1.0-2024-04-20-1200\nhttps://github.com/cyclone-github/phantom_pwn\n")
+	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Decryptor v0.1.0-2024-04-20-2000\nhttps://github.com/cyclone-github/phantom_pwn\n")
 }
 
 // help func
@@ -226,8 +226,8 @@ func startProc(wordlistFileFlag string, outputPath string, numGoroutines int, st
 	var writeWg sync.WaitGroup
 	var hexDecodeErrors int64 = 0 // hex error counter
 
-	readChunks := make(chan []byte, 10000) // channel for reading chunks of data
-	writeData := make(chan []byte, 100)    // channel for writing processed data
+	readChunks := make(chan []byte, 500) // channel for reading chunks of data
+	writeData := make(chan []byte, 10)   // channel for writing processed data
 
 	var file *os.File
 	var err error
@@ -322,19 +322,11 @@ func startProc(wordlistFileFlag string, outputPath string, numGoroutines int, st
 
 	elapsedTime := time.Since(startTime)
 	runTime := float64(elapsedTime.Seconds())
-	linesPerSecond := float64(linesHashed) / elapsedTime.Seconds() * 0.000001
+	linesPerSecond := float64(linesHashed) / elapsedTime.Seconds()
 	if hexDecodeErrors > 0 {
 		log.Printf("HEX decode errors: %d\n", hexDecodeErrors)
 	}
-	log.Printf("Finished processing %d lines in %.3f sec (%.3f M lines/sec)\n", linesHashed, runTime, linesPerSecond)
-}
-
-// / deriveKey using PBKDF2 and SHA-256
-func deriveKey(password, salt []byte, iterations int) *[32]byte {
-	keyBytes := pbkdf2.Key(password, salt, iterations, 32, sha256.New)
-	var key [32]byte
-	copy(key[:], keyBytes)
-	return &key
+	log.Printf("Finished processing %d lines in %.3f sec (%.3f lines/sec)\n", linesHashed, runTime, linesPerSecond)
 }
 
 // decryptVault using secretbox
@@ -495,9 +487,10 @@ func setNumThreads(userThreads int) int {
 
 // print welcome screen
 func printWelcomeScreen(vaultFileFlag, wordlistFileFlag *string, validVaultCount, numThreads int) {
-	fmt.Fprintln(os.Stderr, " ----------------------------------- ")
-	fmt.Fprintln(os.Stderr, "| Cyclone's Phantom Vault Decryptor |")
-	fmt.Fprintln(os.Stderr, " ----------------------------------- ")
+	fmt.Fprintln(os.Stderr, " ----------------------------------------------- ")
+	fmt.Fprintln(os.Stderr, "|       Cyclone's Phantom Vault Decryptor       |")
+	fmt.Fprintln(os.Stderr, "| https://github.com/cyclone-github/phantom_pwn |")
+	fmt.Fprintln(os.Stderr, " ----------------------------------------------- ")
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintf(os.Stderr, "Vault file:\t%s\n", *vaultFileFlag)
 	fmt.Fprintf(os.Stderr, "Valid Vaults:\t%d\n", validVaultCount)
@@ -582,6 +575,7 @@ func main() {
 	startProc(*wordlistFileFlag, *outputFile, numThreads, stopChan, vaults, crackedCountCh, linesProcessedCh)
 
 	// close stop channel to signal all workers to stop
+	time.Sleep(10 * time.Millisecond)
 	closeStopChannel(stopChan)
 }
 
