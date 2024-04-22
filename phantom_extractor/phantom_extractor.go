@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -24,6 +25,7 @@ https://github.com/cyclone-github/phantom_pwn/blob/main/LICENSE
 
 version history
 v0.1.0-2024-04-16; initial release
+v0.2.0-2024-04-22-1500; add support for older vaults
 */
 
 // clear screen function
@@ -42,7 +44,7 @@ func clearScreen() {
 
 // version func
 func versionFunc() {
-	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.1.0-2024-04-16\nhttps://github.com/cyclone-github/phantom_pwn\n")
+	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.2.0-2024-04-22-1500\nhttps://github.com/cyclone-github/phantom_pwn\n")
 }
 
 // help func
@@ -66,7 +68,7 @@ func printWelcomeScreen() {
 	fmt.Println(" ----------------------------------------------------- ")
 }
 
-// define structs
+// struct for Phantom vaults
 type EncryptedKey struct {
 	Digest     string `json:"digest"`
 	Encrypted  string `json:"encrypted"`
@@ -76,25 +78,69 @@ type EncryptedKey struct {
 	Salt       string `json:"salt"`
 }
 
-type Entry struct {
+// vault format "version_0"
+type Vault_0 struct {
+	Expiry float64 `json:"expiry"`
+	Value  string  `json:"value"`
+}
+
+// vault format "version_1"
+type Vault_1 struct {
 	EncryptedKey EncryptedKey `json:"encryptedKey"`
 	Version      int          `json:"version"`
 }
 
-// print JSON structure if encryptedKey is found
-func processEncryptedKeyData(data []byte) {
-	var entry Entry
-	if err := json.Unmarshal(data, &entry); err == nil {
-		if entry.EncryptedKey.Encrypted != "" {
-			printWelcomeScreen()
-			entryJSON, err := json.Marshal(entry)
-			if err != nil {
-				fmt.Println("Error marshalling entry to JSON:", err)
-				return
-			}
-			fmt.Println(string(entryJSON))
+// processLevelDB with version handling
+func processLevelDB(data []byte) {
+	// detect vault version
+	version := detectVersion(data)
+
+	switch version {
+	case 1: // vault version_1
+		var vault_1 Vault_1
+		if err := json.Unmarshal(data, &vault_1); err == nil {
+			printJSONVault(vault_1)
 		}
+	case 0: // vault version_0
+		var vault_0 Vault_0
+		if err := json.Unmarshal(data, &vault_0); err == nil {
+			cleanStr := strings.ReplaceAll(vault_0.Value, `\`, "") // remove "\" so json can be unmarshaled
+			var encryptedKey EncryptedKey
+			if err := json.Unmarshal([]byte(cleanStr), &encryptedKey); err == nil {
+				vault_0 := Vault_1{
+					EncryptedKey: encryptedKey,
+					Version:      0, // mark as version_0 to keep backwards compatibility with phantom_decryptor
+				}
+				printJSONVault(vault_0)
+			}
+		}
+	default:
+		// do nothing
 	}
+}
+
+// print valid JSON vaults
+func printJSONVault(entry Vault_1) {
+	// sanity check if vault is valid (not empty)
+	if entry.EncryptedKey.Digest != "" && entry.EncryptedKey.Encrypted != "" && entry.EncryptedKey.Iterations != 0 &&
+		entry.EncryptedKey.Kdf != "" && entry.EncryptedKey.Nonce != "" && entry.EncryptedKey.Salt != "" {
+		entryJSON, err := json.Marshal(entry)
+		if err != nil {
+			fmt.Println("Error marshalling entry to JSON:", err)
+			return
+		}
+		fmt.Println(string(entryJSON))
+	}
+}
+
+// vault version detection
+func detectVersion(data []byte) int {
+	if strings.Contains(string(data), "\"encryptedKey\":") {
+		return 1
+	} else if strings.Contains(string(data), "\"expiry\":") {
+		return 0
+	}
+	return -1 // unknown version
 }
 
 // main
@@ -135,11 +181,13 @@ func main() {
 	}
 	defer db.Close()
 
+	printWelcomeScreen()
+
 	iter := db.NewIterator(nil, nil)
 	defer iter.Release()
 	for iter.Next() {
 		value := iter.Value()
-		processEncryptedKeyData(value)
+		processLevelDB(value)
 	}
 }
 
