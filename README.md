@@ -1,6 +1,9 @@
 # Phantom Vault Extractor & Decryptor
 ### POC tools to extract and decrypt Phantom vaults
 _**This toolset is proudly the first publicly released Phantom Vault Extractor and Decryptor**_
+
+### Writeup of my process of decrypting Phantom Wallets and recovering the seed phrase
+- https://github.com/cyclone-github/writeups/blob/main/Pwning%20Phantom%20Wallets.pdf
 ### Phantom vault location for Chrome extensions:
 - Linux: `/home/$USER/.config/google-chrome/Default/Local\ Extension\ Settings/bfnaelmomeimhlpmgjnjophhpkkoljpa/`
 - Mac: `Library>Application Support>Google>Chrome>Default>Local Extension Settings>bfnaelmomeimhlpmgjnjophhpkkoljpa`
