@@ -45,7 +45,7 @@ Decrypted: 0/1  6360.82 h/s     00h:01m:00s
 -version (version info)
 -help (usage instructions)
 
-./phantom_decryptor.bin -h {phantom_wallet_hash} -w {wordlist} -o {output} -t {cpu threads} -s {print status every nth sec}
+./phantom_decryptor.bin -h {phantom_wallet_hash} -w {wordlist} -t {cpu threads} -s {print status every nth sec}
 
 ./phantom_decryptor.bin -h phantom.txt -w wordlist.txt -t 16 -s 10
 
