@@ -39,7 +39,6 @@ Decrypted: 0/1  6360.82 h/s     00h:01m:00s
 ```
 -w {wordlist} (omit -w to read from stdin)
 -h {phantom_wallet_hash}
--o {output} (omit -o to write to stdout)
 -t {cpu threads}
 -s {print status every nth sec}
 
@@ -48,11 +47,11 @@ Decrypted: 0/1  6360.82 h/s     00h:01m:00s
 
 ./phantom_decryptor.bin -h {phantom_wallet_hash} -w {wordlist} -o {output} -t {cpu threads} -s {print status every nth sec}
 
-./phantom_decryptor.bin -h phantom.txt -w wordlist.txt -o cracked.txt -t 16 -s 10
+./phantom_decryptor.bin -h phantom.txt -w wordlist.txt -t 16 -s 10
 
 cat wordlist | ./phantom_decryptor.bin -h phantom.txt
 
-./phantom_decryptor.bin -h phantom.txt -w wordlist.txt -o output.txt
+./phantom_decryptor.bin -h phantom.txt -w wordlist.txt
 ```
 ### Decryptor credits:
 - Shoutout to blandyuk for his help with research - https://github.com/blandyuk
@@ -65,11 +64,11 @@ cat wordlist | ./phantom_decryptor.bin -h phantom.txt
   - `cd phantom_pwn/phantom_extractor`
   - `go mod init phantom_extractor`
   - `go mod tidy`
-  - `go build -ldflags="-s -w" phantom_extractor.go`
+  - `go build -ldflags="-s -w" .`
   - phantom_decryptor
   - `cd phantom_pwn/phantom_decryptor`
   - `go mod init phantom_decryptor`
   - `go mod tidy`
-  - `go build -ldflags="-s -w" phantom_decryptor.go`
+  - `go build -ldflags="-s -w" .`
 - Compile from source code how-to:
   - https://github.com/cyclone-github/scripts/blob/main/intro_to_go.txt
