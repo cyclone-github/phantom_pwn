@@ -158,7 +158,7 @@ func startCracker(stopChan chan struct{}, password []byte, vaults []Vault, crack
 
 	for i := range vaults {
 		if !vaults[i].Decrypted { // check only undecrypted vaults
-			decryptedData, err := decryptVault(vaults[i].EncryptedData, password, vaults[i].Salt, vaults[i].Nonce, vaults[i].Iterations)
+			decryptedData, err := decryptVault(vaults[i].EncryptedData, password, vaults[i].Salt, vaults[i].Nonce, vaults[i].Iterations, vaults[i].Kdf)
 			if err != nil {
 				allDecrypted = false
 				continue // skip to next vault if decryption fails

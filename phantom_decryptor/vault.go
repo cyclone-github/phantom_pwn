@@ -14,14 +14,13 @@ import (
 )
 
 // settings for Phantom Wallet Vaults
-
-// PhantomVault struct
 type Vault struct {
 	EncryptedData []byte
 	Salt          []byte
 	Nonce         []byte
 	Iterations    int
 	Decrypted     bool
+	Kdf           string
 }
 
 // isValid function as placeholder, always returning true
@@ -29,13 +28,25 @@ func isValid(s []byte) bool {
 	return true
 }
 
-// decryptVault using secretbox
-func decryptVault(encryptedData, password, salt, nonce []byte, iterations int) ([]byte, error) {
+// decryptVault using secretbox and supporting both pbkdf2 and scrypt
+func decryptVault(encryptedData, password, salt, nonce []byte, iterations int, kdf string) ([]byte, error) {
 	if len(nonce) != 24 {
 		return nil, fmt.Errorf("nonce must be exactly 24 bytes long")
 	}
 
-	key := pbkdf2.Key(password, salt, iterations, 32, sha256.New)
+	var key []byte
+	//var err error
+
+	switch kdf {
+	case "pbkdf2":
+		key = pbkdf2.Key(password, salt, iterations, 32, sha256.New)
+	case "scrypt":
+		fmt.Printf("\n%s KDF is not yet supported\n", kdf)
+		os.Exit(0)
+		// placeholder for future script KDF logic
+	default:
+		return nil, fmt.Errorf("unsupported KDF: %s", kdf)
+	}
 
 	var nonceArray [24]byte
 	copy(nonceArray[:], nonce)
@@ -79,9 +90,9 @@ func readVaultData(filePath string) ([]Vault, error) {
 			continue
 		}
 
-		// sanity checks for Phanton vault
+		// sanity checks for Phantom vault
 		if hash.EncryptedKey.Digest != "sha256" ||
-			hash.EncryptedKey.Kdf != "pbkdf2" ||
+			(hash.EncryptedKey.Kdf != "pbkdf2" && hash.EncryptedKey.Kdf != "scrypt") ||
 			hash.EncryptedKey.Iterations <= 0 ||
 			len(hash.EncryptedKey.Encrypted) == 0 ||
 			len(hash.EncryptedKey.Salt) == 0 ||
@@ -104,6 +115,7 @@ func readVaultData(filePath string) ([]Vault, error) {
 			Salt:          salt,
 			Nonce:         nonce,
 			Iterations:    hash.EncryptedKey.Iterations,
+			Kdf:           hash.EncryptedKey.Kdf,
 		}
 		vaults = append(vaults, vault)
 	}

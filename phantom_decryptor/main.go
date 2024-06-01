@@ -29,6 +29,9 @@ v0.1.0-2024-04-20-2000; initial release
 v0.1.1-2024-05-02-1600;
 	refactor code
 	fixed https://github.com/cyclone-github/phantom_pwn/issues/1
+v0.1.2-2024-05-31-1700;
+	acknowledged https://github.com/cyclone-github/phantom_pwn/issues/3
+	added placeholder for scrypt KDF
 */
 
 // main func
