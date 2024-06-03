@@ -5,12 +5,18 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
+	"unicode"
 
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/syndtr/goleveldb/leveldb/storage"
+	"github.com/syndtr/goleveldb/leveldb/table"
 )
 
 /*
@@ -26,6 +32,7 @@ https://github.com/cyclone-github/phantom_pwn/blob/main/LICENSE
 version history
 v0.1.0-2024-04-16; initial release
 v0.2.0-2024-04-22-1500; add support for older vaults
+v0.3.1-2024-06-23-1145; added raw db support for reading corrupt or non-standard leveldb files
 */
 
 // clear screen function
@@ -44,7 +51,7 @@ func clearScreen() {
 
 // version func
 func versionFunc() {
-	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.2.0-2024-04-22-1500\nhttps://github.com/cyclone-github/phantom_pwn\n")
+	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.3.1-2024-06-23-1145\nhttps://github.com/cyclone-github/phantom_pwn\n")
 }
 
 // help func
@@ -174,14 +181,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	printWelcomeScreen()
+
 	db, err := leveldb.OpenFile(ldbDir, nil)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Failed to open Vault:", err)
-		os.Exit(1)
+		fmt.Fprintln(os.Stderr, "Error opening Vault:", err)
+		fmt.Println("Attempting to dump raw .ldb files...")
+		err = dumpRawLDBFiles(ldbDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to dump raw .ldb files: %v\n", err)
+			os.Exit(1)
+		}
+		os.Exit(0)
 	}
 	defer db.Close()
-
-	printWelcomeScreen()
 
 	iter := db.NewIterator(nil, nil)
 	defer iter.Release()
@@ -191,4 +204,62 @@ func main() {
 	}
 }
 
-// end code
+func dumpRawLDBFiles(dirPath string) error {
+	return filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Printf("Failed to access path %s: %v", path, err)
+			return nil
+		}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".ldb") {
+			err = dumpRawLDBFile(path)
+			if err != nil {
+				log.Printf("Failed to dump file %s: %v", path, err)
+			}
+		}
+		return nil
+	})
+}
+
+func dumpRawLDBFile(filePath string) error {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return fmt.Errorf("failed to get file info: %w", err)
+	}
+
+	reader, err := table.NewReader(file, fileInfo.Size(), storage.FileDesc{Type: storage.TypeTable, Num: 0}, nil, nil, &opt.Options{})
+	if err != nil {
+		return fmt.Errorf("failed to create table reader: %w", err)
+	}
+	defer reader.Release()
+
+	iter := reader.NewIterator(nil, nil)
+	defer iter.Release()
+
+	for iter.Next() {
+		value := iter.Value()
+		processLevelDB(filterPrintableBytes(value))
+	}
+	if err := iter.Error(); err != nil {
+		return fmt.Errorf("iterator error: %w", err)
+	}
+
+	return nil
+}
+
+func filterPrintableBytes(data []byte) []byte {
+	printable := make([]rune, 0, len(data))
+	for _, b := range data {
+		if unicode.IsPrint(rune(b)) {
+			printable = append(printable, rune(b))
+		} else {
+			printable = append(printable, '.')
+		}
+	}
+	return []byte(string(printable))
+}
