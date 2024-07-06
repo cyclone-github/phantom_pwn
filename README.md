@@ -1,4 +1,3 @@
-### _Note: as of `Phantom v24.9.x`, the KDF has switched from `pbdfk2` to `scrypt` and is not yet supported by `phantom_decryptor`. See issue: https://github.com/cyclone-github/phantom_pwn/issues/3_
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=cyclone-github&repo=phantom_pwn&theme=gruvbox)](https://github.com/cyclone-github/)
 # Phantom Vault Extractor & Decryptor
 ### POC tools to extract and decrypt Phantom vaults

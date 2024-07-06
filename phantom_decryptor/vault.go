@@ -11,6 +11,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"golang.org/x/crypto/nacl/secretbox"
 	"golang.org/x/crypto/pbkdf2"
+	"golang.org/x/crypto/scrypt"
 )
 
 // settings for Phantom Wallet Vaults
@@ -35,15 +36,20 @@ func decryptVault(encryptedData, password, salt, nonce []byte, iterations int, k
 	}
 
 	var key []byte
-	//var err error
+	var err error
 
 	switch kdf {
 	case "pbkdf2":
 		key = pbkdf2.Key(password, salt, iterations, 32, sha256.New)
 	case "scrypt":
-		fmt.Printf("\n%s KDF is not yet supported\n", kdf)
-		os.Exit(0)
-		// placeholder for future script KDF logic
+		N := 4096
+		r := 8
+		p := 1
+		dkLen := 32
+		key, err = scrypt.Key(password, salt, N, r, p, dkLen)
+		if err != nil {
+			return nil, fmt.Errorf("scrypt key derivation failed: %v", err)
+		}
 	default:
 		return nil, fmt.Errorf("unsupported KDF: %s", kdf)
 	}

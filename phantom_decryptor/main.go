@@ -32,6 +32,9 @@ v0.1.1-2024-05-02-1600;
 v0.1.2-2024-05-31-1700;
 	acknowledged https://github.com/cyclone-github/phantom_pwn/issues/3
 	added placeholder for scrypt KDF
+v0.1.3-2024-07-06-1100;
+	added support for scrypt KDF
+	fixed https://github.com/cyclone-github/phantom_pwn/issues/3
 */
 
 // main func
