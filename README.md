@@ -39,19 +39,20 @@ Decrypted: 0/1  6360.82 h/s     00h:01m:00s
 ```
 -w {wordlist} (omit -w to read from stdin)
 -h {phantom_wallet_hash}
+-o {output} (omit -o to write to stdout)
 -t {cpu threads}
 -s {print status every nth sec}
 
 -version (version info)
 -help (usage instructions)
 
-./phantom_decryptor.bin -h {phantom_wallet_hash} -w {wordlist} -t {cpu threads} -s {print status every nth sec}
+./phantom_decryptor.bin -h {phantom_wallet_hash} -w {wordlist} -o {output} -t {cpu threads} -s {print status every nth sec}
 
-./phantom_decryptor.bin -h phantom.txt -w wordlist.txt -t 16 -s 10
+./phantom_decryptor.bin -h phantom.txt -w wordlist.txt -o cracked.txt -t 16 -s 10
 
 cat wordlist | ./phantom_decryptor.bin -h phantom.txt
 
-./phantom_decryptor.bin -h phantom.txt -w wordlist.txt
+./phantom_decryptor.bin -h phantom.txt -w wordlist.txt -o output.txt
 ```
 ### Decryptor credits:
 - Shoutout to blandyuk for his help with research - https://github.com/blandyuk

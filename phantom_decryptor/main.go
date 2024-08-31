@@ -35,6 +35,8 @@ v0.1.2-2024-05-31-1700;
 v0.1.3-2024-07-06-1100;
 	added support for scrypt KDF
 	fixed https://github.com/cyclone-github/phantom_pwn/issues/3
+v0.1.4-2024-08-31-1630;
+	finished implementing flag -o {output file}
 */
 
 // main func
@@ -72,9 +74,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Try running with -help for usage instructions")
 		os.Exit(1)
 	}
-
-	// override outputFile since this has not been implemented yet
-	*outputFile = ""
 
 	startTime := time.Now()
 

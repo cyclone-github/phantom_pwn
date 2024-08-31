@@ -95,7 +95,7 @@ func startProc(wordlistFileFlag string, outputPath string, numGoroutines int, st
 		defer writeWg.Done()
 		var writer *bufio.Writer
 		if outputPath != "" {
-			outFile, err := os.Create(outputPath)
+			outFile, err := os.OpenFile(outputPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				fmt.Println(os.Stderr, "Error creating output file:", err)
 				return
@@ -133,7 +133,7 @@ func processChunk(chunk []byte, count *int64, hexErrorCount *int64, writer *bufi
 		if chunk[i] == '\n' {
 			password := chunk[lineStart:i]
 			decodedBytes, _, hexErrCount := checkForHexBytes(password)
-			startCracker(stopChan, decodedBytes, vaults, crackedCountCh, linesProcessedCh)
+			startCracker(stopChan, decodedBytes, vaults, crackedCountCh, linesProcessedCh, writer)
 			atomic.AddInt64(count, 1)
 			atomic.AddInt64(hexErrorCount, int64(hexErrCount))
 			lineStart = i + 1 // move start index past the newline
@@ -144,7 +144,7 @@ func processChunk(chunk []byte, count *int64, hexErrorCount *int64, writer *bufi
 	if lineStart < len(chunk) {
 		password := chunk[lineStart:]
 		decodedBytes, _, hexErrCount := checkForHexBytes(password)
-		startCracker(stopChan, decodedBytes, vaults, crackedCountCh, linesProcessedCh)
+		startCracker(stopChan, decodedBytes, vaults, crackedCountCh, linesProcessedCh, writer)
 		atomic.AddInt64(count, 1)
 		atomic.AddInt64(hexErrorCount, int64(hexErrCount))
 	}
@@ -153,7 +153,7 @@ func processChunk(chunk []byte, count *int64, hexErrorCount *int64, writer *bufi
 }
 
 // hash cracking worker
-func startCracker(stopChan chan struct{}, password []byte, vaults []Vault, crackedCountCh chan int, linesProcessedCh chan int) {
+func startCracker(stopChan chan struct{}, password []byte, vaults []Vault, crackedCountCh chan int, linesProcessedCh chan int, writer *bufio.Writer) {
 	allDecrypted := true
 
 	for i := range vaults {
@@ -166,7 +166,12 @@ func startCracker(stopChan chan struct{}, password []byte, vaults []Vault, crack
 			if isValid(decryptedData) {
 				crackedCountCh <- 1
 				vaults[i].Decrypted = true
-				fmt.Printf("\nPassword: '%s'\n", password)
+				if writer != nil {
+					writer.WriteString(fmt.Sprintf("\nPassword: '%s'\n", password))
+					writer.Flush()
+				} else {
+					fmt.Printf("\nPassword: '%s'\n", password)
+				}
 			} else {
 				allDecrypted = false
 			}

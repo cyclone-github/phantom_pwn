@@ -11,15 +11,18 @@ import (
 
 // clear screen function
 func clearScreen() {
+	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "linux", "darwin":
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
+		cmd = exec.Command("clear")
 	case "windows":
-		cmd := exec.Command("cmd", "/c", "cls")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
+		cmd = exec.Command("cmd", "/c", "cls")
+	default:
+		return // no action on unsupported platforms
+	}
+	cmd.Stdout = os.Stdout
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to clear screen:", err)
 	}
 }
 
