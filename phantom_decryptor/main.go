@@ -37,6 +37,11 @@ v0.1.3-2024-07-06-1100;
 	fixed https://github.com/cyclone-github/phantom_pwn/issues/3
 v0.1.4-2024-08-31-1630;
 	finished implementing flag -o {output file}
+v0.1.5-2024-11-30-1415;
+	fix https://github.com/cyclone-github/phantom_pwn/issues/6
+	swapped crackedCount and lineProcessed channels for atomic int32 for better performance
+	multiple performance optimizations in process.go
+	print vault:password when vault is cracked
 */
 
 // main func
@@ -80,11 +85,15 @@ func main() {
 	// set CPU threads
 	numThreads := setNumThreads(*threadFlag)
 
-	// channels / variables
-	crackedCountCh := make(chan int, 10)     // buffer of 10 to reduce blocking
-	linesProcessedCh := make(chan int, 1000) // buffer of 1000 to reduce blocking
+	// variables
+	var (
+		crackedCount   int32
+		linesProcessed int32
+		wg             sync.WaitGroup
+	)
+
+	// channels
 	stopChan := make(chan struct{})
-	var wg sync.WaitGroup
 
 	// goroutine to watch for ctrl+c
 	handleGracefulShutdown(stopChan)
@@ -102,14 +111,16 @@ func main() {
 
 	// monitor status of workers
 	wg.Add(1)
-	go monitorPrintStats(crackedCountCh, linesProcessedCh, stopChan, startTime, validVaultCount, &wg, *statsIntervalFlag)
+	go monitorPrintStats(&crackedCount, &linesProcessed, stopChan, startTime, validVaultCount, &wg, *statsIntervalFlag)
 
 	// start the processing logic
-	startProc(*wordlistFileFlag, *outputFile, numThreads, stopChan, vaults, crackedCountCh, linesProcessedCh)
+	startProc(*wordlistFileFlag, *outputFile, numThreads, vaults, &crackedCount, &linesProcessed, stopChan)
 
 	// close stop channel to signal all workers to stop
-	time.Sleep(10 * time.Millisecond)
 	closeStopChannel(stopChan)
+
+	// wait for monitorPrintStats to finish
+	wg.Wait()
 }
 
 // end code

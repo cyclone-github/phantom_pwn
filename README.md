@@ -21,19 +21,21 @@ _**This toolset is proudly the first publicly released Phantom Vault Extractor a
 ```
 ### Decryptor usage example:
 ```
-./phantom_decryptor.bin -h phantom.txt -w wordlist.txt
  ----------------------------------------------- 
 |       Cyclone's Phantom Vault Decryptor       |
 | https://github.com/cyclone-github/phantom_pwn |
  ----------------------------------------------- 
 
-Vault file:     phantom.txt
+Vault file:     hash.txt
 Valid Vaults:   1
 CPU Threads:    16
 Wordlist:       wordlist.txt
-Working...
+2024/11/30 14:11:35 Working...
+{"encryptedKey":{"digest":"sha256","encrypted":"5pLvA3bCjNGYBbSjjFY3mdPknwFfp3cz9dCBv6izyyrqEhYCBkKwo3zZUzBP44KtY3","iterations":10000,"kdf":"pbkdf2","nonce":"NZT6kw5Cd5VeZu5yJGJcFcP24tnmg4xsR","salt":"A43vTZnm9c5CiQ6FLTdV9v"},"version":1}:password
+2024/11/30 14:11:39 Decrypted: 1/1 6181.36 h/s 00h:00m:03s
 
-Decrypted: 0/1  6360.82 h/s     00h:01m:00s
+2024/11/30 14:11:39 Finished
+
 ```
 ### Decryptor supported options:
 ```

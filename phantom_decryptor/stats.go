@@ -5,13 +5,13 @@ import (
 	"log"
 	"os"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
 // monitor status
-func monitorPrintStats(crackedCountCh, linesProcessedCh <-chan int, stopChan <-chan struct{}, startTime time.Time, validVaultCount int, wg *sync.WaitGroup, interval int) {
-	crackedCount := 0
-	linesProcessed := 0
+func monitorPrintStats(crackedCount *int32, linesProcessed *int32, stopChan <-chan struct{}, startTime time.Time, validVaultCount int, wg *sync.WaitGroup, interval int) {
+
 	var ticker *time.Ticker
 	if interval > 0 {
 		ticker = time.NewTicker(time.Duration(interval) * time.Second)
@@ -20,31 +20,26 @@ func monitorPrintStats(crackedCountCh, linesProcessedCh <-chan int, stopChan <-c
 
 	for {
 		select {
-		case <-crackedCountCh:
-			crackedCount++
-		case <-linesProcessedCh:
-			linesProcessed++
 		case <-stopChan:
 			// print final stats and exit
-			printStats(time.Since(startTime), crackedCount, validVaultCount, linesProcessed, true)
+			printStats(time.Since(startTime), int(atomic.LoadInt32(crackedCount)), validVaultCount, int(atomic.LoadInt32(linesProcessed)), true)
 			wg.Done()
 			return
 		case <-func() <-chan time.Time {
 			if ticker != nil {
 				return ticker.C
 			}
-			// return nil channel if ticker is not used
 			return nil
 		}():
 			if interval > 0 {
-				printStats(time.Since(startTime), crackedCount, validVaultCount, linesProcessed, false)
+				printStats(time.Since(startTime), int(atomic.LoadInt32(crackedCount)), validVaultCount, int(atomic.LoadInt32(linesProcessed)), false)
 			}
 		}
 	}
 }
 
 // printStats
-func printStats(elapsedTime time.Duration, crackedCount, validVaultCount, linesProcessed int, exitProgram bool) {
+func printStats(elapsedTime time.Duration, crackedCount int, validVaultCount, linesProcessed int, exitProgram bool) {
 	hours := int(elapsedTime.Hours())
 	minutes := int(elapsedTime.Minutes()) % 60
 	seconds := int(elapsedTime.Seconds()) % 60

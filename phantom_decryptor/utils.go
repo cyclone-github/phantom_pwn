@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
+	"sync/atomic"
 	"syscall"
 )
 
@@ -42,7 +43,6 @@ func handleGracefulShutdown(stopChan chan struct{}) {
 	go func() {
 		<-interruptChan
 		fmt.Fprintln(os.Stderr, "\nCtrl+C pressed. Shutting down...")
-		//close(stopChan)
 		closeStopChannel(stopChan)
 	}()
 }
@@ -53,4 +53,14 @@ func setNumThreads(userThreads int) int {
 		return runtime.NumCPU()
 	}
 	return userThreads
+}
+
+// check if all vaults are cracked
+func isAllVaultsCracked(vaults []Vault) bool {
+	for i := range vaults {
+		if atomic.LoadInt32(&vaults[i].Decrypted) == 0 {
+			return false
+		}
+	}
+	return true
 }

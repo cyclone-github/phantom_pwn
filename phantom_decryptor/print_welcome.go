@@ -8,7 +8,7 @@ import (
 
 // version func
 func versionFunc() {
-	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Decryptor v0.1.4-2024-08-31-1630\nhttps://github.com/cyclone-github/phantom_pwn\n")
+	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Decryptor v0.1.5-2024-11-30-1415\nhttps://github.com/cyclone-github/phantom_pwn\n")
 }
 
 // help func

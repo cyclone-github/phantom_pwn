@@ -20,8 +20,9 @@ type Vault struct {
 	Salt          []byte
 	Nonce         []byte
 	Iterations    int
-	Decrypted     bool
+	Decrypted     int32
 	Kdf           string
+	VaultText     string
 }
 
 // isValid function as placeholder, always returning true
@@ -122,6 +123,7 @@ func readVaultData(filePath string) ([]Vault, error) {
 			Nonce:         nonce,
 			Iterations:    hash.EncryptedKey.Iterations,
 			Kdf:           hash.EncryptedKey.Kdf,
+			VaultText:     line,
 		}
 		vaults = append(vaults, vault)
 	}
