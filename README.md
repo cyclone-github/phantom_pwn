@@ -1,4 +1,9 @@
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=cyclone-github&repo=phantom_pwn&theme=gruvbox)](https://github.com/cyclone-github/)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=cyclone-github&repo=phantom_pwn&theme=gruvbox)](https://github.com/cyclone-github/phantom_pwn/)
+
+[![GitHub issues](https://img.shields.io/github/issues/cyclone-github/phantom_pwn.svg)](https://github.com/cyclone-github/phantom_pwn/issues)
+[![License](https://img.shields.io/github/license/cyclone-github/phantom_pwn.svg)](LICENSE)
+[![GitHub release](https://img.shields.io/github/release/cyclone-github/phantom_pwn.svg)](https://github.com/cyclone-github/phantom_pwn/releases)
+
 # Phantom Vault Extractor & Decryptor
 ### POC tools to extract and decrypt Phantom vaults
 _**This toolset is proudly the first publicly released Phantom Vault Extractor and Decryptor**_
