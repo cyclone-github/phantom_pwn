@@ -17,6 +17,7 @@ _**This toolset is proudly the first publicly released Phantom Vault Extractor a
 - Mac: `Library>Application Support>Google>Chrome>Default>Local Extension Settings>bfnaelmomeimhlpmgjnjophhpkkoljpa`
 - Windows: `C:\Users\$USER\AppData\Local\Google\Chrome\User Data\Default\Local Extension Settings\bfnaelmomeimhlpmgjnjophhpkkoljpa\`
 ### Extractor usage example on test vault: (plaintext is `password`)
+* Old pbkdf2 KDF
 ```
 ./phantom_extractor.bin bfnaelmomeimhlpmgjnjophhpkkoljpa/
  ----------------------------------------------------- 
@@ -29,6 +30,25 @@ _**This toolset is proudly the first publicly released Phantom Vault Extractor a
 |          hashcat -m 30010 hash (pbkdf2 kdf)         |
  ----------------------------------------------------- 
 $phantom$SU9HoVMjb1ieOEv18nz3FQ==$7H29InVRWVbHS4WcBJdTay0ONb4mLX9Q$g0vJAbflhH4jJJDvuv7Ar5THgzBmJ8tt6oajsQZd/dSXNNjcY5/0eGeF5c1NW1WU
+ ----------------------------------------------------- 
+|          hashcat -m 26651 hash (pbkdf2 kdf)         |
+ ----------------------------------------------------- 
+PHANTOM:10000:SU9HoVMjb1ieOEv18nz3FQ==:7H29InVRWVbHS4WcBJdTay0ONb4mLX9Q:g0vJAbflhH4jJJDvuv7Ar5THgzBmJ8tt6oajsQZd/dSXNNjcY5/0eGeF5c1NW1WU
+```
+* New scrypt KDF
+```
+./phantom_extractor.bin bfnaelmomeimhlpmgjnjophhpkkoljpa/
+ ----------------------------------------------------- 
+|        Cyclone's Phantom Vault Hash Extractor       |
+|        Use Phantom Vault Decryptor to decrypt       |
+|    https://github.com/cyclone-github/phantom_pwn    |
+ ----------------------------------------------------- 
+{"encryptedKey":{"digest":"sha256","encrypted":"37fJoKsB9vwnKEzPgc2AHtYVsPTTzrXdTGacbgWxLxbiS7Ri3P3iNnf8csaKwJ4wpk","iterations":10000,"kdf":"scrypt","nonce":"49aomus4HiKLyg7F66pSinR4tpuUuJDHX","salt":"M1PMFn4p4gdCxZDzf8qX71"},"version":1}
+ ----------------------------------------------------- 
+|          hashcat -m 26650 hash (scrypt kdf)         |
+ ----------------------------------------------------- 
+PHANTOM:4096:8:1:ogSL4J4xP/wNbAjiA8Q4hA==:Iofs3VYyyaYFzHVkcMsnpkrjGQ2+Kni2:OacHaTJAM8dD7XJIj5bGMU3cM8QW3u92n+ngYjXsgRSR20FDnkMLQHTgPxJDefOx
+
 ```
 ### Decryptor usage example:
 ```

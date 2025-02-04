@@ -39,8 +39,8 @@ v0.3.1-2024-06-23-1145;
 	added raw db support for reading corrupt or non-standard leveldb files
 v0.3.2-2024-11-30-1415;
 	updated help info for Chrome extensions on Linux, Mac and Windows
-v0.3.3-2025-02-03;
-	added support for printing hashcat -m 30010 hash
+v0.3.3-2025-02-04;
+	added support for hashcat modes 30010, 26650, 26651
 */
 
 // clear screen function
@@ -59,7 +59,7 @@ func clearScreen() {
 
 // version func
 func versionFunc() {
-	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.3.3-2025-02-03\nhttps://github.com/cyclone-github/phantom_pwn\n")
+	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.3.3-2025-02-04\nhttps://github.com/cyclone-github/phantom_pwn\n")
 }
 
 // help func
@@ -168,61 +168,6 @@ func detectVersion(data []byte) int {
 	return -1 // unknown version
 }
 
-// main
-func main() {
-	cycloneFlag := flag.Bool("cyclone", false, "")
-	versionFlag := flag.Bool("version", false, "Program version")
-	helpFlag := flag.Bool("help", false, "Program usage instructions")
-	flag.Parse()
-
-	clearScreen()
-
-	// run sanity checks for special flags
-	if *versionFlag {
-		versionFunc()
-		os.Exit(0)
-	}
-	if *cycloneFlag {
-		line := "Q29kZWQgYnkgY3ljbG9uZSA7KQo="
-		str, _ := base64.StdEncoding.DecodeString(line)
-		fmt.Println(string(str))
-		os.Exit(0)
-	}
-	if *helpFlag {
-		helpFunc()
-		os.Exit(0)
-	}
-
-	ldbDir := flag.Arg(0)
-	if ldbDir == "" {
-		fmt.Fprintln(os.Stderr, "Error: Phantom vault directory is required")
-		helpFunc()
-		os.Exit(1)
-	}
-
-	printWelcomeScreen()
-
-	db, err := leveldb.OpenFile(ldbDir, nil)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error opening Vault:", err)
-		fmt.Println("Attempting to dump raw .ldb files...")
-		err = dumpRawLDBFiles(ldbDir)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to dump raw .ldb files: %v\n", err)
-			os.Exit(1)
-		}
-		os.Exit(0)
-	}
-	defer db.Close()
-
-	iter := db.NewIterator(nil, nil)
-	defer iter.Release()
-	for iter.Next() {
-		value := iter.Value()
-		processLevelDB(value)
-	}
-}
-
 func dumpRawLDBFiles(dirPath string) error {
 	return filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -283,15 +228,8 @@ func filterPrintableBytes(data []byte) []byte {
 	return []byte(string(printable))
 }
 
-// print hashcat -m 30010 hash (only for pbkdf2 KDF)
+// print hashcat modes 30010, 26650, 26651
 func printHashcatHash(vault Vault_1) {
-	// only print if kdf is pbkdf2
-	if strings.ToLower(vault.EncryptedKey.Kdf) != "pbkdf2" {
-		fmt.Println(" ----------------------------------------------------- ")
-		fmt.Println("|         hashcat scrypt kdf not supported yet        |")
-		fmt.Println(" ----------------------------------------------------- ")
-		return
-	}
 
 	saltDecoded := base58.Decode(vault.EncryptedKey.Salt)
 	nonceDecoded := base58.Decode(vault.EncryptedKey.Nonce)
@@ -301,11 +239,85 @@ func printHashcatHash(vault Vault_1) {
 	nonceB64 := base64.StdEncoding.EncodeToString(nonceDecoded)
 	encryptedB64 := base64.StdEncoding.EncodeToString(encryptedDecoded)
 
-	fmt.Println(" ----------------------------------------------------- ")
-	fmt.Println("|          hashcat -m 30010 hash (pbkdf2 kdf)         |")
-	fmt.Println(" ----------------------------------------------------- ")
-	// $phantom$<salt_b64>$<nonce_b64>$<encrypted_b64>
-	fmt.Printf("$phantom$%s$%s$%s\n", saltB64, nonceB64, encryptedB64)
+	// scrypt KDF
+	if strings.ToLower(vault.EncryptedKey.Kdf) == "scrypt" {
+		fmt.Println(" ----------------------------------------------------- ")
+		fmt.Println("|          hashcat -m 26650 hash (scrypt kdf)         |")
+		fmt.Println(" ----------------------------------------------------- ")
+		// PHANTOM:4096:8:1:<salt_b64>:<nonce_b64>:<encrypted_b64>
+		fmt.Printf("PHANTOM:4096:8:1:%s:%s:%s\n", saltB64, nonceB64, encryptedB64)
+		return
+	}
+
+	// pbkdf2 KDF
+	if strings.ToLower(vault.EncryptedKey.Kdf) == "pbkdf2" {
+		fmt.Println(" ----------------------------------------------------- ")
+		fmt.Println("|          hashcat -m 30010 hash (pbkdf2 kdf)         |")
+		fmt.Println(" ----------------------------------------------------- ")
+		// $phantom$<salt_b64>$<nonce_b64>$<encrypted_b64>
+		fmt.Printf("$phantom$%s$%s$%s\n", saltB64, nonceB64, encryptedB64)
+
+		fmt.Println(" ----------------------------------------------------- ")
+		fmt.Println("|          hashcat -m 26651 hash (pbkdf2 kdf)         |")
+		fmt.Println(" ----------------------------------------------------- ")
+		// PHANTOM:10000:<salt_b64>:<nonce_b64>:<encrypted_b64>
+		fmt.Printf("PHANTOM:10000:%s:%s:%s\n", saltB64, nonceB64, encryptedB64)
+	}
+}
+
+// main
+func main() {
+	cycloneFlag := flag.Bool("cyclone", false, "")
+	versionFlag := flag.Bool("version", false, "Program version")
+	helpFlag := flag.Bool("help", false, "Program usage instructions")
+	flag.Parse()
+
+	clearScreen()
+
+	// run sanity checks for special flags
+	if *versionFlag {
+		versionFunc()
+		os.Exit(0)
+	}
+	if *cycloneFlag {
+		line := "Q29kZWQgYnkgY3ljbG9uZSA7KQo="
+		str, _ := base64.StdEncoding.DecodeString(line)
+		fmt.Println(string(str))
+		os.Exit(0)
+	}
+	if *helpFlag {
+		helpFunc()
+		os.Exit(0)
+	}
+
+	ldbDir := flag.Arg(0)
+	if ldbDir == "" {
+		fmt.Fprintln(os.Stderr, "Error: Phantom vault directory is required")
+		helpFunc()
+		os.Exit(1)
+	}
+
+	printWelcomeScreen()
+
+	db, err := leveldb.OpenFile(ldbDir, nil)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error opening Vault:", err)
+		fmt.Println("Attempting to dump raw .ldb files...")
+		err = dumpRawLDBFiles(ldbDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to dump raw .ldb files: %v\n", err)
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+	defer db.Close()
+
+	iter := db.NewIterator(nil, nil)
+	defer iter.Release()
+	for iter.Next() {
+		value := iter.Value()
+		processLevelDB(value)
+	}
 }
 
 // end code
