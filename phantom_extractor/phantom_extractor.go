@@ -13,6 +13,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/btcsuite/btcutil/base58"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/storage"
@@ -30,9 +31,16 @@ GNU General Public License v2.0
 https://github.com/cyclone-github/phantom_pwn/blob/main/LICENSE
 
 version history
-v0.1.0-2024-04-16; initial release
-v0.2.0-2024-04-22-1500; add support for older vaults
-v0.3.1-2024-06-23-1145; added raw db support for reading corrupt or non-standard leveldb files
+v0.1.0-2024-04-16;
+	initial release
+v0.2.0-2024-04-22-1500;
+	add support for older vaults
+v0.3.1-2024-06-23-1145;
+	added raw db support for reading corrupt or non-standard leveldb files
+v0.3.2-2024-11-30-1415;
+	updated help info for Chrome extensions on Linux, Mac and Windows
+v0.3.3-2025-02-03;
+	added support for printing hashcat -m 30010 hash
 */
 
 // clear screen function
@@ -51,7 +59,7 @@ func clearScreen() {
 
 // version func
 func versionFunc() {
-	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.3.1-2024-06-23-1145\nhttps://github.com/cyclone-github/phantom_pwn\n")
+	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.3.3-2025-02-03\nhttps://github.com/cyclone-github/phantom_pwn\n")
 }
 
 // help func
@@ -59,10 +67,18 @@ func helpFunc() {
 	versionFunc()
 	str := `Example Usage:
 ./phantom_extractor.bin [-version] [-help] [phantom_vault_dir]
-./phantom_extractor.bin ldeveldb/
+./phantom_extractor.bin bfnaelmomeimhlpmgjnjophhpkkoljpa/
 
-Note: Phantom Vault Dir location on Linux with Chrome:
-/home/$USER/.config/google-chrome/Default/Local\ Extension\ Settings/bfnaelmomeimhlpmgjnjophhpkkoljpa/`
+Default Phantom vault locations for Chrome extensions:
+
+Linux:
+/home/$USER/.config/google-chrome/Default/Local\ Extension\ Settings/bfnaelmomeimhlpmgjnjophhpkkoljpa/
+
+Mac:
+Library>Application Support>Google>Chrome>Default>Local Extension Settings>bfnaelmomeimhlpmgjnjophhpkkoljpa
+
+Windows:
+C:\Users\$USER\AppData\Local\Google\Chrome\User Data\Default\Local Extension Settings\bfnaelmomeimhlpmgjnjophhpkkoljpa\`
 	fmt.Fprintln(os.Stderr, str)
 }
 
@@ -107,6 +123,7 @@ func processLevelDB(data []byte) {
 		var vault_1 Vault_1
 		if err := json.Unmarshal(data, &vault_1); err == nil {
 			printJSONVault(vault_1)
+			printHashcatHash(vault_1)
 		}
 	case 0: // vault version_0
 		var vault_0 Vault_0
@@ -119,6 +136,7 @@ func processLevelDB(data []byte) {
 					Version:      0, // mark as version_0 to keep backwards compatibility with phantom_decryptor
 				}
 				printJSONVault(vault_0)
+				printHashcatHash(vault_0)
 			}
 		}
 	default:
@@ -178,6 +196,7 @@ func main() {
 	ldbDir := flag.Arg(0)
 	if ldbDir == "" {
 		fmt.Fprintln(os.Stderr, "Error: Phantom vault directory is required")
+		helpFunc()
 		os.Exit(1)
 	}
 
@@ -263,3 +282,30 @@ func filterPrintableBytes(data []byte) []byte {
 	}
 	return []byte(string(printable))
 }
+
+// print hashcat -m 30010 hash (only for pbkdf2 KDF)
+func printHashcatHash(vault Vault_1) {
+	// only print if kdf is pbkdf2
+	if strings.ToLower(vault.EncryptedKey.Kdf) != "pbkdf2" {
+		fmt.Println(" ----------------------------------------------------- ")
+		fmt.Println("|         hashcat scrypt kdf not supported yet        |")
+		fmt.Println(" ----------------------------------------------------- ")
+		return
+	}
+
+	saltDecoded := base58.Decode(vault.EncryptedKey.Salt)
+	nonceDecoded := base58.Decode(vault.EncryptedKey.Nonce)
+	encryptedDecoded := base58.Decode(vault.EncryptedKey.Encrypted)
+
+	saltB64 := base64.StdEncoding.EncodeToString(saltDecoded)
+	nonceB64 := base64.StdEncoding.EncodeToString(nonceDecoded)
+	encryptedB64 := base64.StdEncoding.EncodeToString(encryptedDecoded)
+
+	fmt.Println(" ----------------------------------------------------- ")
+	fmt.Println("|          hashcat -m 30010 hash (pbkdf2 kdf)         |")
+	fmt.Println(" ----------------------------------------------------- ")
+	// $phantom$<salt_b64>$<nonce_b64>$<encrypted_b64>
+	fmt.Printf("$phantom$%s$%s$%s\n", saltB64, nonceB64, encryptedB64)
+}
+
+// end code

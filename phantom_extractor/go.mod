@@ -1,7 +1,10 @@
 module phantom_extractor
 
-go 1.22.4
+go 1.23.4
 
-require github.com/syndtr/goleveldb v1.0.0
+require (
+	github.com/btcsuite/btcutil v1.0.2
+	github.com/syndtr/goleveldb v1.0.0
+)
 
-require github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
+require github.com/golang/snappy v0.0.4 // indirect

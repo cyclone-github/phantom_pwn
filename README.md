@@ -25,6 +25,10 @@ _**This toolset is proudly the first publicly released Phantom Vault Extractor a
 |    https://github.com/cyclone-github/phantom_pwn    |
  ----------------------------------------------------- 
 {"encryptedKey":{"digest":"sha256","encrypted":"5pLvA3bCjNGYBbSjjFY3mdPknwFfp3cz9dCBv6izyyrqEhYCBkKwo3zZUzBP44KtY3","iterations":10000,"kdf":"pbkdf2","nonce":"NZT6kw5Cd5VeZu5yJGJcFcP24tnmg4xsR","salt":"A43vTZnm9c5CiQ6FLTdV9v"},"version":1}
+ ----------------------------------------------------- 
+|          hashcat -m 30010 hash (pbkdf2 kdf)         |
+ ----------------------------------------------------- 
+$phantom$SU9HoVMjb1ieOEv18nz3FQ==$7H29InVRWVbHS4WcBJdTay0ONb4mLX9Q$g0vJAbflhH4jJJDvuv7Ar5THgzBmJ8tt6oajsQZd/dSXNNjcY5/0eGeF5c1NW1WU
 ```
 ### Decryptor usage example:
 ```
