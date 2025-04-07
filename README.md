@@ -8,6 +8,7 @@
 ### POC tools to recover, extract and decrypt Phantom vaults
 _**This toolset is proudly the first publicly released Phantom Vault Extractor and Decryptor**_
 - Contact me at https://forum.hashpwn.net/user/cyclone if you need help recovering your Phantom wallet password or seed phrase
+- Note: `phantom_extractor` supports hashcat modes 30010, 26650, and 26651 for convenience, but these are third-party modules that are not affiliated with or included in the official hashcat beta or release builds at https://github.com/hashcat/hashcat
 
 ### Writeup of my process of decrypting Phantom Wallets and recovering the seed phrase
 - https://github.com/cyclone-github/writeups/blob/main/Pwning%20Phantom%20Wallets.pdf
