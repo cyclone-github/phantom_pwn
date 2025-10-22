@@ -62,11 +62,11 @@ Vault file:     hash.txt
 Valid Vaults:   1
 CPU Threads:    16
 Wordlist:       wordlist.txt
-2024/11/30 14:11:35 Working...
+2025/10/22 14:11:35 Working...
 {"encryptedKey":{"digest":"sha256","encrypted":"5pLvA3bCjNGYBbSjjFY3mdPknwFfp3cz9dCBv6izyyrqEhYCBkKwo3zZUzBP44KtY3","iterations":10000,"kdf":"pbkdf2","nonce":"NZT6kw5Cd5VeZu5yJGJcFcP24tnmg4xsR","salt":"A43vTZnm9c5CiQ6FLTdV9v"},"version":1}:password
-2024/11/30 14:11:39 Decrypted: 1/1 6181.36 h/s 00h:00m:03s
+2025/10/22 14:11:39 Decrypted: 1/1 6181.36 h/s 00h:00m:03s
 
-2024/11/30 14:11:39 Finished
+2025/10/22 14:11:39 Finished
 
 ```
 ### Decryptor supported options:

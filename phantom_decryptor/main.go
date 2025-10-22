@@ -42,6 +42,8 @@ v0.1.5-2024-11-30-1415;
 	swapped crackedCount and lineProcessed channels for atomic int32 for better performance
 	multiple performance optimizations in process.go
 	print vault:password when vault is cracked
+v1.0.0; 2025-10-22;
+	stable release
 */
 
 // main func

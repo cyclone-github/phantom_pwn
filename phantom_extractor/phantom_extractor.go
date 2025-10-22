@@ -41,6 +41,8 @@ v0.3.2-2024-11-30-1415;
 	updated help info for Chrome extensions on Linux, Mac and Windows
 v0.3.3-2025-02-04;
 	added support for hashcat modes 30010, 26650, 26651
+v1.0.0; 2025-10-22;
+	stable release
 */
 
 // clear screen function
@@ -59,7 +61,7 @@ func clearScreen() {
 
 // version func
 func versionFunc() {
-	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v0.3.3-2025-02-04\nhttps://github.com/cyclone-github/phantom_pwn\n")
+	fmt.Fprintln(os.Stderr, "Cyclone's Phantom Vault Extractor v1.0.0; 2025-10-22\nhttps://github.com/cyclone-github/phantom_pwn\n")
 }
 
 // help func
