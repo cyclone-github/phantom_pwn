@@ -1,0 +1,42 @@
+name: deps-ci
+on:
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module:
+        - "phantom_decryptor"
+        - "phantom_extractor"
+    defaults:
+      run:
+        working-directory: ${{ matrix.module }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go (per module)
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: '${{ matrix.module }}/go.mod'
+          check-latest: true
+
+      - name: Tidy
+        run: go mod tidy
+
+      - name: Build
+        run: go build ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: govulncheck (non-blocking)
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          "$(go env GOPATH)/bin/govulncheck" ./... || true
