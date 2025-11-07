@@ -24,7 +24,7 @@ jobs:
       - name: Setup Go (per module)
         uses: actions/setup-go@v5
         with:
-          go-version-file: '${{ matrix.module }}/go.mod'
+          go-version: 'stable'
           check-latest: true
 
       - name: Tidy
