@@ -1,10 +1,20 @@
-[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=cyclone-github&repo=phantom_pwn&theme=gruvbox)](https://github.com/cyclone-github/phantom_pwn/)
+[![Readme Card](https://github-readme-stats-fast.vercel.app/api/pin/?username=cyclone-github&repo=phantom_pwn&theme=gruvbox)](https://github.com/cyclone-github/phantom_pwn/)
 
 [![GitHub issues](https://img.shields.io/github/issues/cyclone-github/phantom_pwn.svg)](https://github.com/cyclone-github/phantom_pwn/issues)
 [![License](https://img.shields.io/github/license/cyclone-github/phantom_pwn.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/release/cyclone-github/phantom_pwn.svg)](https://github.com/cyclone-github/phantom_pwn/releases)
 
 # Phantom Vault Extractor & Decryptor
+
+### Install phantom_extractor:
+```
+go install github.com/cyclone-github/phantom_pwn/phantom_extractor@main
+```
+### Install phantom_decryptor:
+```
+go install github.com/cyclone-github/phantom_pwn/phantom_decryptor@main
+```
+
 ### POC tools to recover, extract and decrypt Phantom vaults
 _**This toolset is proudly the first publicly released Phantom Vault Extractor and Decryptor**_
 - Contact me at https://forum.hashpwn.net/user/cyclone if you need help recovering your Phantom wallet password or seed phrase

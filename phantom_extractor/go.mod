@@ -1,6 +1,6 @@
-module phantom_extractor
+module github.com/cyclone-github/phantom_pwn/phantom_extractor
 
-go 1.25.2
+go 1.25.5
 
 require (
 	github.com/btcsuite/btcutil v1.0.2
